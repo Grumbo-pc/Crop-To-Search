@@ -1,5 +1,9 @@
 # Crop To Search
 
-A tool similar to Google's circle to search but for windows (HUGE UPDATE COMMING SOON!)
+A tool similar to Google's circle to search but for windows 
+
+DO NOT SHOW ANY SENSETIVE INFO ON YOUR SCREEN WHILE HAVING THIS TOOL OPEN IT DOES NOT USE ANY KIND OF ENCRYPTION 
+
+(HUGE UPDATE COMMING SOON!)
 
 installation guide: https://youtu.be/RVNJya2wDWA
