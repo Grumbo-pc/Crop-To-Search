@@ -12,6 +12,16 @@ namespace Crop_To_Search
         {
             InitializeComponent();
             this.Load += new EventHandler(Form2_Load);
+            this.Click += Form2_Click;
+            foreach (Control c in this.Controls)
+            {
+                c.Click += Form2_Click;
+            }
+        }
+
+        private void Form2_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
 
         private void Form2_Load(object sender, EventArgs e)
@@ -42,3 +52,4 @@ namespace Crop_To_Search
         }
     }
 }
+

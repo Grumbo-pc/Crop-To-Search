@@ -25,7 +25,6 @@ namespace Crop_To_Search
             SetStartupPosition();
             Load += new EventHandler(Form1_Load);
             this.FormBorderStyle = FormBorderStyle.None;
-            this.Deactivate += form1_Deactivate;
             ShowForm2();
         }
 
@@ -111,10 +110,6 @@ namespace Crop_To_Search
             this.Show();
         }
 
-        private void form1_Deactivate(object sender, EventArgs e)
-        {
-            this.Close();
-        }
 
         // Event handler for pictureBox2 Click
         private void pictureBox2_Click(object sender, EventArgs e)
