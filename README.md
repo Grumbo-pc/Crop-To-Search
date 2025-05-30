@@ -7,3 +7,6 @@ DO NOT SHOW ANY SENSETIVE INFO ON YOUR SCREEN WHILE HAVING THIS TOOL OPEN IT DOE
 (HUGE UPDATE COMMING SOON!)
 
 installation guide: https://youtu.be/RVNJya2wDWA
+
+Leaks for the next update:
+![Alt text]()
