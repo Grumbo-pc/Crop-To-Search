@@ -9,4 +9,4 @@ DO NOT SHOW ANY SENSETIVE INFO ON YOUR SCREEN WHILE HAVING THIS TOOL OPEN IT DOE
 installation guide: https://youtu.be/RVNJya2wDWA
 
 Leaks for the next update:
-![Alt text](https://i.ibb.co/jkvZyFjH/Screenshot-2025-05-30-183726.png")
+![Alt text](https://i.ibb.co/YB7TcGVb/Screenshot-2025-05-30-183726.png)
