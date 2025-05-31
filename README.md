@@ -11,4 +11,6 @@ installation guide: https://youtu.be/RVNJya2wDWA
 Leaks for the next update:
 ![leak](https://i.ibb.co/YB7TcGVb/Screenshot-2025-05-30-183726.png)
 
+Leaked Functionality:
+
 [![Leaked Functionality](https://img.youtube.com/vi/kWggN-7Bna0/0.jpg)](https://www.youtube.com/watch?v=kWggN-7Bna0)
