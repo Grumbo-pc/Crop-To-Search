@@ -10,3 +10,4 @@ installation guide: https://youtu.be/RVNJya2wDWA
 
 Leaks for the next update:
 ![leak](https://i.ibb.co/YB7TcGVb/Screenshot-2025-05-30-183726.png)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/kWggN-7Bna0?si=5zpWdqpxdabjDdbX" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
