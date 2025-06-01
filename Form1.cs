@@ -14,13 +14,12 @@ namespace Crop_To_Search
     public partial class Form1 : Form
     {
         private WebView2 webView;
-        private ProgressBar progressBar;
-        
+        private System.Windows.Forms.Timer progressTimer;
+        private int fakeProgress;
 
         public Form1()
         {
             InitializeComponent();
-            InitializeProgressBar();
             InitializeWebView();
             SetStartupPosition();
             Load += new EventHandler(Form1_Load);
@@ -30,14 +29,14 @@ namespace Crop_To_Search
 
         private void SetStartupPosition()
         {
-            this.Width = 1200; // Increased width
-            this.Height = 800; // Increased height
+            this.Width = 1200;
+            this.Height = 800;
 
             int screenWidth = Screen.PrimaryScreen.Bounds.Width;
             int screenHeight = Screen.PrimaryScreen.Bounds.Height;
 
             int x = (screenWidth - this.Width) / 2;
-            int y = (screenHeight - this.Height) / 2; // Center vertically
+            int y = (screenHeight - this.Height) / 2;
 
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(x, y);
@@ -46,7 +45,6 @@ namespace Crop_To_Search
         private async void Form1_Load(object sender, EventArgs e)
         {
             this.Hide();
-            progressBar.Show();
             string imageUrl = await CaptureAndUploadScreenshot();
             DisplayGoogleLensResults(imageUrl);
         }
@@ -55,18 +53,71 @@ namespace Crop_To_Search
         {
             webView = new WebView2();
             webView.Dock = DockStyle.Fill;
-            webView.Visible = false; // Hide initially
+            webView.Visible = false;
             this.Controls.Add(webView);
             webView.BringToFront();
+
+            webView.CoreWebView2InitializationCompleted += WebView_CoreWebView2InitializationCompleted;
         }
 
-        private void InitializeProgressBar()
+        private void WebView_CoreWebView2InitializationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
         {
-            progressBar = new ProgressBar();
-            progressBar.Style = ProgressBarStyle.Marquee;
-            progressBar.Dock = DockStyle.Bottom;
-            progressBar.MarqueeAnimationSpeed = 1; // Adjust as needed
-            this.Controls.Add(progressBar);
+            if (e.IsSuccess)
+            {
+                webView.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
+                webView.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
+            }
+        }
+
+        private void CoreWebView2_NavigationStarting(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs e)
+        {
+            ShowProgressBar();
+        }
+
+        private void CoreWebView2_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
+        {
+            HideProgressBar();
+        }
+
+        private void ShowProgressBar()
+        {
+            progressBarTop.Visible = true;
+            progressBarTop.Value = 0;
+            fakeProgress = 0;
+
+            if (progressTimer == null)
+            {
+                progressTimer = new System.Windows.Forms.Timer();
+                progressTimer.Interval = 30;
+                progressTimer.Tick += ProgressTimer_Tick;
+            }
+            progressTimer.Start();
+        }
+
+        private void HideProgressBar()
+        {
+            if (progressTimer != null)
+                progressTimer.Stop();
+            progressBarTop.Value = progressBarTop.Maximum;
+            var t = new System.Windows.Forms.Timer();
+            t.Interval = 300;
+            t.Tick += (s, e) =>
+            {
+                progressBarTop.Visible = false;
+                progressBarTop.Value = 0;
+                t.Stop();
+                t.Dispose();
+            };
+            t.Start();
+        }
+
+        private void ProgressTimer_Tick(object sender, EventArgs e)
+        {
+            if (fakeProgress < 90)
+            {
+                fakeProgress += 2;
+                progressBarTop.Value = Math.Min(fakeProgress, 90);
+            }
         }
 
         private async Task<string> CaptureAndUploadScreenshot()
@@ -104,44 +155,51 @@ namespace Crop_To_Search
         {
             string googleLensUrl = $"https://lens.google.com/uploadbyurl?url={imageUrl}";
             webView.Source = new Uri(googleLensUrl);
-            webView.Visible = true; // Show WebView
-            progressBar.Hide(); // Hide progress bar
-            webView.BringToFront(); // Bring WebView to the front
+            webView.Visible = true;
+            webView.BringToFront();
             this.Show();
         }
 
 
-        // Event handler for pictureBox2 Click
-        private void pictureBox2_Click(object sender, EventArgs e)
-        {
-            // Add your logic here if needed
-        }
-
-        // Event handler for Form1 Load
         private void Form1_Load_1(object sender, EventArgs e)
         {
-            // Add your logic here if needed
             this.CreateRoundRegion();
         }
 
-        // Method to create round corners for the form
         private void CreateRoundRegion()
         {
-            Rectangle rect = new Rectangle(0, 0, this.Width, this.Height);
-            int cornerRadius = 10; // Adjust for desired corner radius
-            GraphicsPath path = new GraphicsPath();
-            path.AddArc(rect.X, rect.Y, cornerRadius * 2, cornerRadius * 2, 180, 90);
-            path.AddArc(rect.X + rect.Width - cornerRadius * 2, rect.Y, cornerRadius * 2, cornerRadius * 2, 270, 90);
-            path.AddArc(rect.X + rect.Width - cornerRadius * 2, rect.Y + rect.Height - cornerRadius * 2, cornerRadius * 2, cornerRadius * 2, 0, 90);
-            path.AddArc(rect.X, rect.Y + rect.Height - cornerRadius * 2, cornerRadius * 2, cornerRadius * 2, 90, 90);
+            int radius = 10;
+            using (var path = new GraphicsPath())
+            {
+                float r = radius;
+                float w = this.Width;
+                float h = this.Height;
+                path.StartFigure();
+                path.AddArc(0, 0, r, r, 180, 90);
+                path.AddArc(w - r, 0, r, r, 270, 90);
+                path.AddArc(w - r, h - r, r, r, 0, 90);
+                path.AddArc(0, h - r, r, r, 90, 90);
+                path.CloseFigure();
 
-            this.Region = new Region(path);
+                using (var g = this.CreateGraphics())
+                {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                }
+                this.Region = new Region(path);
+            }
         }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            CreateRoundRegion();
+        }
+
         private void ShowForm2()
         {
             Form2 form2 = new Form2();
             form2.Show();
-            this.BringToFront(); // Bring Form1 to the Top
+            this.BringToFront();
         }
     }
 }
