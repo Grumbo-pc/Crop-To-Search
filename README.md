@@ -2,6 +2,8 @@
 
 A tool similar to Google's circle to search but for windows 
 
+(I am curently aware of the tool not working or spitting out errors ill investigate asap)
+
 DO NOT SHOW ANY SENSETIVE INFO ON YOUR SCREEN WHILE HAVING THIS TOOL OPEN
 
 (V2 Public Pre-Release 1 OUT NOW!)
