@@ -10,4 +10,4 @@ installation guide: https://youtu.be/RVNJya2wDWA
 
 V2 Public Pre-Release 2 Demo Now With :
 
-[![Leaked Functionality](https://img.youtube.com/vi/qN2EOnjzM6E/0.jpg)(https://www.youtube.com/watch?v=qN2EOnjzM6E))]
+[![Leaked Functionality](https://img.youtube.com/vi/qN2EOnjzM6E/0.jpg)(https://www.youtube.com/watch?v=qN2EOnjzM6E)]
