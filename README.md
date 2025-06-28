@@ -2,15 +2,12 @@
 
 A tool similar to Google's circle to search but for windows 
 
-DO NOT SHOW ANY SENSETIVE INFO ON YOUR SCREEN WHILE HAVING THIS TOOL OPEN IT DOES NOT USE ANY KIND OF ENCRYPTION 
+DO NOT SHOW ANY SENSETIVE INFO ON YOUR SCREEN WHILE HAVING THIS TOOL OPEN
 
-(HUGE UPDATE COMMING SOON!)
+(V2 Public Pre-Release 1 OUT NOW!)
 
 installation guide: https://youtu.be/RVNJya2wDWA
 
-Leaks for the next update:
-![leak](https://i.ibb.co/YB7TcGVb/Screenshot-2025-05-30-183726.png)
+V2 Public Pre-Release 2 Demo Now With :
 
-Leaked Functionality:
-
-[![Leaked Functionality](https://img.youtube.com/vi/kWggN-7Bna0/0.jpg)](https://www.youtube.com/watch?v=kWggN-7Bna0)
+[![Leaked Functionality](https://img.youtube.com/vi/qN2EOnjzM6E/0.jpg)](https://www.youtube.com/watch?v=qN2EOnjzM6E)
