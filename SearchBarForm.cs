@@ -49,6 +49,36 @@ namespace Crop_To_Search
             this.StartPosition = FormStartPosition.Manual;
             this.BackColor = Color.White;
             this.Shown += (s, e) => PositionBottomCenterByScreenPercent(0.05f);
+            button1.BackColor = ColorTranslator.FromHtml("#f0f4f9");
+            if (ThemeHelper.IsWindowsInDarkMode())
+            {
+                this.BackColor = Color.FromArgb(52, 51, 56);
+                textBoxSearch.BackColor = Color.FromArgb(52, 51, 56);
+                textBoxSearch.ForeColor = Color.White;
+                textBoxSearch.BorderStyle = BorderStyle.None;
+
+
+                
+                var marginPanel = new Panel();
+                marginPanel.BackColor = Color.FromArgb(52, 51, 56);
+                marginPanel.Size = textBoxSearch.Size + new Size(12, 12);
+                marginPanel.Location = textBoxSearch.Location - new Size(6, 6);
+                marginPanel.Padding = new Padding(0);
+                marginPanel.Margin = new Padding(0);
+                this.Controls.Add(marginPanel);
+                marginPanel.BringToFront();
+                textBoxSearch.Parent = marginPanel;
+                textBoxSearch.Location = new Point(6, 6);
+                button1.BackColor = ColorTranslator.FromHtml("#282a2c");
+            }
+            button1.Width = button1.Height;
+            button1.Margin = Padding.Empty;
+            button1.Padding = Padding.Empty;
+            System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+            path.AddEllipse(0, 0, button1.Width, button1.Height);
+            button1.Region = new Region(path);
+            button1.FlatStyle = FlatStyle.Flat;
+            button1.FlatAppearance.BorderSize = 0;
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -153,6 +183,7 @@ namespace Crop_To_Search
         {
             ShowForm3();
         }
+
         private void ShowForm3()
         {
             if (_form3Instance == null || _form3Instance.IsDisposed)

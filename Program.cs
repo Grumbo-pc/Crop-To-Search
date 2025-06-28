@@ -31,6 +31,7 @@ namespace Crop_To_Search
             searchBarForm.Show();
             searchBarForm.Activate();
 
+
             Application.Run(searchBarForm);
         }
     }

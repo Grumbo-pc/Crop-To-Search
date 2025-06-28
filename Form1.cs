@@ -10,7 +10,6 @@ using Microsoft.Web.WebView2.WinForms;
 
 namespace Crop_To_Search
 {
-
     public partial class Form1 : Form
     {
         private WebView2 webView;
@@ -20,11 +19,20 @@ namespace Crop_To_Search
         public Form1()
         {
             InitializeComponent();
+            progressBarTop = new CustomColorProgressBar();
             InitializeWebView();
             SetStartupPosition();
             Load += new EventHandler(Form1_Load);
             this.FormBorderStyle = FormBorderStyle.None;
             ShowForm2();
+
+            if (ThemeHelper.IsWindowsInDarkMode())
+            {
+                this.BackColor = Color.Black;
+                webView.BackColor = Color.Black;
+                pictureBox1.Show();
+                pictureBox3.Show();
+            }
         }
 
         private void SetStartupPosition()
@@ -46,7 +54,8 @@ namespace Crop_To_Search
         {
             this.Hide();
             string imageUrl = await CaptureAndUploadScreenshot();
-            DisplayGoogleLensResults(imageUrl);
+            if (!string.IsNullOrEmpty(imageUrl))
+                DisplayGoogleLensResults(imageUrl);
         }
 
         private void InitializeWebView()
@@ -71,16 +80,44 @@ namespace Crop_To_Search
 
         private void CoreWebView2_NavigationStarting(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs e)
         {
+            if (ThemeHelper.IsWindowsInDarkMode())
+            {
+                webView.DefaultBackgroundColor = System.Drawing.Color.Black;
+                webView.CoreWebView2.ExecuteScriptAsync(
+                    "document.body.style.backgroundColor = '#000';"
+                );
+            }
             ShowProgressBar();
         }
 
         private void CoreWebView2_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
         {
             HideProgressBar();
+
+            if (ThemeHelper.IsWindowsInDarkMode())
+            {
+                webView.CoreWebView2.ExecuteScriptAsync(
+                    "document.body.style.backgroundColor = '';"
+                );
+            }
         }
 
         private void ShowProgressBar()
         {
+            if (ThemeHelper.IsWindowsInDarkMode())
+            {
+                progressBarTop.BackColor = ColorTranslator.FromHtml("#1f1f1f");
+            }
+            else
+            {
+                progressBarTop.BackColor = SystemColors.Control;
+            }
+
+            progressBarTop.Dock = DockStyle.Top;
+            progressBarTop.Height = 8;
+            progressBarTop.Visible = false;
+            this.Controls.Add(progressBarTop);
+            progressBarTop.BringToFront();
             progressBarTop.Visible = true;
             progressBarTop.Value = 0;
             fakeProgress = 0;
@@ -137,18 +174,45 @@ namespace Crop_To_Search
             }
 
             string apiKey = "c4ef29b400eb25b21651c444349d0b90";
+            int maxRetries = 3;
+
             using (var client = new HttpClient())
             {
-                using (var content = new MultipartFormDataContent())
+                for (int i = 0; i < maxRetries; i++)
                 {
-                    content.Add(new StringContent(apiKey), "key");
-                    content.Add(new ByteArrayContent(File.ReadAllBytes(filePath)), "image", "screenshot.png");
-                    var response = await client.PostAsync("https://api.imgbb.com/1/upload", content);
-                    var json = await response.Content.ReadAsStringAsync();
-                    dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
-                    return result.data.url;
+                    try
+                    {
+                        using (var content = new MultipartFormDataContent())
+                        {
+                            content.Add(new StringContent(apiKey), "key");
+                            content.Add(new ByteArrayContent(File.ReadAllBytes(filePath)), "image", "screenshot.png");
+
+                            var response = await client.PostAsync("https://api.imgbb.com/1/upload", content);
+                            response.EnsureSuccessStatusCode();
+
+                            var json = await response.Content.ReadAsStringAsync();
+                            dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+                            return result.data.url;
+                        }
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        if (i == maxRetries - 1)
+                        {
+                            ShowErrorMessage("Upload failed. Please try again later.");
+                            return null;
+                        }
+                        await Task.Delay(2000);
+                    }
+                    catch (Exception)
+                    {
+                        ShowErrorMessage("An error occurred during upload.");
+                        return null;
+                    }
                 }
             }
+
+            return null;
         }
 
         private void DisplayGoogleLensResults(string imageUrl)
@@ -159,7 +223,6 @@ namespace Crop_To_Search
             webView.BringToFront();
             this.Show();
         }
-
 
         private void Form1_Load_1(object sender, EventArgs e)
         {
@@ -200,6 +263,40 @@ namespace Crop_To_Search
             Form2 form2 = new Form2();
             form2.Show();
             this.BringToFront();
+        }
+
+        private void ShowErrorMessage(string message)
+        {
+            Label errorLabel = new Label();
+            errorLabel.Text = message;
+            errorLabel.Font = new Font("Segoe UI", 20, FontStyle.Bold);
+            errorLabel.ForeColor = Color.Red;
+            errorLabel.AutoSize = true;
+            errorLabel.BackColor = Color.Transparent;
+            errorLabel.TextAlign = ContentAlignment.MiddleCenter;
+
+            this.Invoke((MethodInvoker)(() =>
+            {
+                errorLabel.Left = (this.ClientSize.Width - errorLabel.Width) / 2;
+                errorLabel.Top = this.ClientSize.Height - 100;
+                this.Controls.Add(errorLabel);
+                errorLabel.BringToFront();
+            }));
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
