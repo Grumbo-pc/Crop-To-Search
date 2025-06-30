@@ -1,0 +1,74 @@
+﻿using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
+
+namespace Crop_To_Search
+{
+    public partial class Form2 : Form
+    {
+        private Timer delayTimer;
+
+        public Form2()
+        {
+            InitializeComponent();
+            this.Load += new EventHandler(Form2_Load);
+            this.Click += Form2_Click;
+            foreach (Control c in this.Controls)
+            {
+                c.Click += Form2_Click;
+            }
+        }
+
+        private void Form2_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void Form2_Load(object sender, EventArgs e)
+        {
+            // Make Form2 fill the screen
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.WindowState = FormWindowState.Maximized;
+            this.TopMost = false; // Ensure Form1 is above Form2
+
+            // Set initial opacity to 0 (fully transparent)
+            this.Opacity = 0;
+
+            // Initialize and start the timer
+            delayTimer = new Timer();
+            delayTimer.Interval = 1000; // 1 second delay
+            delayTimer.Tick += DelayTimer_Tick;
+            delayTimer.Start();
+        }
+
+        private void DelayTimer_Tick(object sender, EventArgs e)
+        {
+            // Stop the timer
+            delayTimer.Stop();
+
+            // Make Form2 semi-transparent black
+            this.BackColor = Color.Black;
+            this.Opacity = 0.5;
+        }
+
+        private void CreateRoundRegion()
+        {
+            int radius = 50;
+            var path = new GraphicsPath();
+            path.AddArc(0, 0, radius, radius, 180, 90);
+            path.AddArc(this.Width - radius, 0, radius, radius, 270, 90);
+            path.AddArc(this.Width - radius, this.Height - radius, radius, radius, 0, 90);
+            path.AddArc(0, this.Height - radius, radius, radius, 90, 90);
+            path.CloseAllFigures();
+
+            using (var g = this.CreateGraphics())
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+            }
+
+            this.Region = new Region(path);
+        }
+    }
+}
+

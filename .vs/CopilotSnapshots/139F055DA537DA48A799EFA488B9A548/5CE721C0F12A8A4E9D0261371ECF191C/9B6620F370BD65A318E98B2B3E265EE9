@@ -1,0 +1,402 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing.Drawing2D;
+using NAudio.Wave;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
+using NAudio.Wave.SampleProviders;
+using System.Diagnostics;   // For Process.Start
+using System.IO;            // For Path.Combine and File.Exists
+using System.Windows.Forms; // For WinForms
+using Microsoft.Web.WebView2.Core; // For WebView2
+using System.Text.Json;     // For JSON parsing
+using System.Threading.Tasks; // For Task.Delay and async/await operations
+
+namespace Crop_To_Search
+{
+    public partial class Form3 : Form
+    {
+        private WaveInEvent micSource;
+        private WasapiLoopbackCapture speakerSource;
+        private BufferedWaveProvider micBuffer;
+        private BufferedWaveProvider speakerBuffer;
+        private WaveFileWriter writer;
+        private string outputFilePath;
+
+        // --- WebView2 Specific Variables ---
+        private const string AhaMusicUrl = "https://www.aha-music.com/";
+        // This path assumes your recorded WAV file is saved here:
+        private string _recordedAudioFilePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Temp", "result.wav"
+        );
+
+        public Form3()
+        {
+            InitializeComponent();
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.StartPosition = FormStartPosition.Manual;
+            this.Size = new Size(300, 120);
+
+            // --- WebView2 Initialization ---
+            this.FormClosing += Form3_FormClosing;
+            this.Load += async (s, e) =>
+            {
+                // If you have other Form3_Load logic, call it here
+                // e.g., Form3_Load(s, e);
+                await InitializeWebView2Async();
+            };
+
+            // --- FIX 1: Wire up the recording stopped event handler ---
+            // If using micSource for recording, ensure the event is attached:
+            // (Place this after micSource is initialized, e.g., in StartCombinedRecording or constructor if appropriate)
+            // micSource.RecordingStopped += WaveIn_RecordingStopped;
+            // If you use a different variable for WaveInEvent, adjust accordingly.
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            ApplyRoundCorners(10);
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            ApplyRoundCorners(10);
+        }
+
+        private void ApplyRoundCorners(int radius)
+        {
+            using (var path = new GraphicsPath())
+            {
+                float r = radius;
+                float w = this.Width;
+                float h = this.Height;
+                path.StartFigure();
+                path.AddArc(0, 0, r, r, 180, 90);
+                path.AddArc(w - r, 0, r, r, 270, 90);
+                path.AddArc(w - r, h - r, r, r, 0, 90);
+                path.AddArc(0, h - r, r, r, 90, 90);
+                path.CloseFigure();
+                this.Region = new Region(path);
+            }
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form3_Load(object sender, EventArgs e)
+        {
+            StartCombinedRecording();
+        }
+
+        public async void StartCombinedRecording()
+        {
+            outputFilePath = Path.Combine(Path.GetTempPath(), "result.wav");
+
+            // Set up microphone input (44.1kHz mono)
+            micSource = new WaveInEvent();
+            micSource.WaveFormat = new WaveFormat(44100, 1);
+            micBuffer = new BufferedWaveProvider(micSource.WaveFormat);
+
+            micSource.DataAvailable += (s, a) =>
+            {
+                micBuffer.AddSamples(a.Buffer, 0, a.BytesRecorded);
+            };
+
+            // Set up speaker (loopback) input (system default format, often 48kHz stereo)
+            speakerSource = new WasapiLoopbackCapture();
+            speakerBuffer = new BufferedWaveProvider(speakerSource.WaveFormat);
+
+            speakerSource.DataAvailable += (s, a) =>
+            {
+                speakerBuffer.AddSamples(a.Buffer, 0, a.BytesRecorded);
+            };
+
+            micSource.StartRecording();
+            speakerSource.StartRecording();
+
+            // Convert both sources to 44.1kHz stereo for mixing
+            var micProvider = micBuffer.ToSampleProvider();
+            if (micProvider.WaveFormat.SampleRate != 44100)
+                micProvider = new WdlResamplingSampleProvider(micProvider, 44100);
+            micProvider = micProvider.ToStereo();
+
+            var speakerProvider = speakerBuffer.ToSampleProvider();
+            if (speakerProvider.WaveFormat.SampleRate != 44100)
+                speakerProvider = new WdlResamplingSampleProvider(speakerProvider, 44100);
+            if (speakerProvider.WaveFormat.Channels == 1)
+                speakerProvider = speakerProvider.ToStereo();
+
+            var mixer = new MixingSampleProvider(new[] { micProvider, speakerProvider });
+            mixer.ReadFully = true;
+
+            writer = new WaveFileWriter(outputFilePath, WaveFormat.CreateIeeeFloatWaveFormat(44100, 2));
+
+            var buffer = new float[44100 * 2]; // 1 second buffer for stereo
+            int secondsRecorded = 0;
+
+            while (secondsRecorded < 7) // Changed from 15 to 7
+            {
+                int samplesRead = mixer.Read(buffer, 0, buffer.Length);
+                if (samplesRead > 0)
+                {
+                    writer.WriteSamples(buffer, 0, samplesRead);
+                }
+                await Task.Delay(1000);
+                secondsRecorded++;
+            }
+
+            micSource.StopRecording();
+            speakerSource.StopRecording();
+            writer.Dispose();
+
+            // Open the recorded file with the default audio player
+           // Process.Start(outputFilePath);
+        }
+
+        // --- WebView2 Integration Methods ---
+
+        /// <summary>
+        /// Initializes the WebView2 runtime and sets up event handlers.
+        /// </summary>
+        private async Task InitializeWebView2Async()
+        {
+            try
+            {
+                // IMPORTANT: Ensure your WebView2 control is named 'webView2AhaMusic' in the designer.
+                await webView2AhaMusic.EnsureCoreWebView2Async(null);
+                webView2AhaMusic.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
+                webView2AhaMusic.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+                webView2AhaMusic.CoreWebView2.Settings.IsScrollbarEnabled = false;
+                webView2AhaMusic.CoreWebView2.Settings.AreDevToolsEnabled = true; // Keep for debugging
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to initialize WebView2: {ex.Message}", "WebView2 Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Optionally disable recording buttons if WebView2 is critical for the app
+                // btnStartRecording.Enabled = false; // Adjust based on your UI
+            }
+        }
+
+        /// <summary>
+        /// Starts the music identification process by navigating WebView2 to AHA Music.
+        /// This is called automatically after recording stops.
+        /// </summary>
+        private async Task StartMusicIdentificationProcess()
+        {
+            if (webView2AhaMusic.CoreWebView2 == null)
+            {
+                MessageBox.Show("WebView2 is not ready for music identification. Please restart.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+                return;
+            }
+
+            if (!File.Exists(_recordedAudioFilePath))
+            {
+                MessageBox.Show($"Error: Recorded audio file not found at '{_recordedAudioFilePath}'. Cannot proceed with identification.", "File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+                return;
+            }
+
+            webView2AhaMusic.Visible = true;
+            webView2AhaMusic.Source = new Uri(AhaMusicUrl);
+        }
+
+        /// <summary>
+        /// Handles WebView2 navigation completion. Attempts to click upload button and scrape result.
+        /// </summary>
+        private async void CoreWebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            if (e.IsSuccess && e.Uri.ToString().StartsWith(AhaMusicUrl))
+            {
+                try
+                {
+                    string scriptToClickUpload = @"
+                        var uploadInput = document.querySelector('input[type=""file""][accept=""audio/*""]');
+                        if (uploadInput) {
+                            uploadInput.click();
+                            true;
+                        } else {
+                            false;
+                        }
+                    ";
+                    bool buttonClicked = await webView2AhaMusic.CoreWebView2.ExecuteScriptAsync(scriptToClickUpload) == "true";
+
+                    if (buttonClicked)
+                    {
+                        MessageBox.Show("A file selection dialog should appear. Please select the 'result.wav' file.\nFile path: " + _recordedAudioFilePath, "Action Required: Manual Upload", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Could not find the 'Choose a file' button automatically. Please locate and click it manually on the webpage, then select:\n" + _recordedAudioFilePath, "Action Required: Manual Upload", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+
+                    await Task.Delay(8000); // Give user time to select file and website to process.
+
+                    await ExtractAndGoogleSongName();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error during webpage interaction or scraping: {ex.Message}", "WebView2 Process Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.Close();
+                }
+            }
+            else if (!e.IsSuccess)
+            {
+                MessageBox.Show($"Failed to load AHA Music: {e.WebErrorStatus}", "WebView2 Navigation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+            }
+        }
+
+        /// <summary>
+        /// Scrapes the song name from the webpage, Googles it, and closes the app.
+        /// </summary>
+        private async Task ExtractAndGoogleSongName()
+        {
+            string songTitle = "Song Not Found";
+            string artistName = "";
+
+            try
+            {
+                string jsResultExtraction = @"
+                    var song = '';
+                    var artist = '';
+
+                    var primaryTitleElement = document.querySelector('.result-details .song-title');
+                    var primaryArtistElement = document.querySelector('.result-details .artist-name');
+
+                    if (primaryTitleElement) {
+                        song = primaryTitleElement.textContent.trim();
+                    }
+                    if (primaryArtistElement) {
+                        artist = primaryArtistElement.textContent.trim();
+                    }
+
+                    if (!song && !artist) {
+                        var resultCard = document.querySelector('.recognition-result-card');
+                        if (resultCard) {
+                            var titleInCard = resultCard.querySelector('h2.song-name');
+                            var artistInCard = resultCard.querySelector('span.artist-text');
+                            if (titleInCard) song = titleInCard.textContent.trim();
+                            if (artistInCard) artist = artistInCard.textContent.trim();
+                        }
+                    }
+
+                    JSON.stringify({ song: song, artist: artist });
+                ";
+
+                string jsonResult = await webView2AhaMusic.CoreWebView2.ExecuteScriptAsync(jsResultExtraction);
+
+                using (JsonDocument doc = JsonDocument.Parse(jsonResult))
+                {
+                    JsonElement root = doc.RootElement;
+                    if (root.TryGetProperty("song", out JsonElement songElement) && songElement.ValueKind != JsonValueKind.Null)
+                    {
+                        songTitle = songElement.GetString();
+                    }
+                    if (root.TryGetProperty("artist", out JsonElement artistElement) && artistElement.ValueKind != JsonValueKind.Null)
+                    {
+                        artistName = artistElement.GetString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to scrape song information. Error: {ex.Message}\nCheck browser console for JS errors or AHA Music's HTML structure.", "Scraping Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            if (!string.IsNullOrEmpty(songTitle) && songTitle != "Song Not Found")
+            {
+                string searchQuery = $"{songTitle} {artistName}".Trim();
+                MessageBox.Show($"Identified: {songTitle} by {artistName}. Opening Google...", "Identification Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Process.Start(new ProcessStartInfo($"https://www.google.com/search?q={Uri.EscapeDataString(searchQuery)}") { UseShellExecute = true });
+            }
+            else
+            {
+                MessageBox.Show("Music recognition failed: Song not found on page.", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+            webView2AhaMusic.Visible = false;
+            this.Close();
+        }
+
+        // Optional: Method to receive messages from JavaScript (useful for advanced interactions)
+        private void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            Debug.WriteLine($"Message from web page: {e.TryGetWebMessageAsString()}");
+        }
+
+        /// <summary>
+        /// Disposes WebView2 resources when the form is closing.
+        /// </summary>
+        private void Form3_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Call your NAudio cleanup method here if you have one
+            // Example: CleanupRecording();
+
+            if (webView2AhaMusic != null && webView2AhaMusic.CoreWebView2 != null)
+            {
+                webView2AhaMusic.Dispose();
+            }
+        }
+
+        // --- Integrate call to StartMusicIdentificationProcess() after recording stops ---
+        // If you have a WaveIn_RecordingStopped or similar, add this logic:
+        private void WaveIn_RecordingStopped(object sender, StoppedEventArgs e)
+        {
+            this.Invoke((MethodInvoker)async delegate
+            {
+                // ...existing NAudio cleanup and file opening logic...
+
+                if (e.Exception != null)
+                {
+                    MessageBox.Show($"Recording stopped due to an error: {e.Exception.Message}", "Recording Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo(_recordedAudioFilePath) { UseShellExecute = true });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Could not open the recorded file: {ex.Message}", "Error Opening File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    // --- AUTOMATICALLY START WEBVIEW2 IDENTIFICATION HERE ---
+                    await StartMusicIdentificationProcess();
+                }
+            });
+        }
+
+        // ...rest of your class...
+    }
+
+    // Extension method must be in a static class
+    public static class SampleProviderExtensions
+    {
+        public static ISampleProvider ToStereo(this ISampleProvider source)
+        {
+            if (source.WaveFormat.Channels == 2)
+                return source;
+            return new MonoToStereoSampleProvider(source);
+        }
+    }
+}

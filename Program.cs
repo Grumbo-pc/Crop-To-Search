@@ -26,11 +26,11 @@ namespace Crop_To_Search
             Form2 backdropForm = new Form2();
             SearchBarForm searchBarForm = new SearchBarForm();
             mainForm.Owner = backdropForm;
+            searchBarForm.Owner = backdropForm; // <-- Add this line
             backdropForm.Show();
             mainForm.Show();
             searchBarForm.Show();
             searchBarForm.Activate();
-
 
             Application.Run(searchBarForm);
         }

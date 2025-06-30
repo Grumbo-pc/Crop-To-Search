@@ -1,0 +1,269 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing.Drawing2D;
+using NAudio.Wave;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
+using NAudio.Wave.SampleProviders;
+using System.Diagnostics;   // For Process.Start
+using System.IO;            
+using System.Windows.Forms; 
+using Microsoft.Web.WebView2.Core; 
+using System.Text.Json;     
+using System.Threading.Tasks; 
+using System.Runtime.InteropServices; // For COMException
+
+namespace Crop_To_Search
+{
+    public partial class Form3 : Form
+    {
+        private WaveInEvent micSource;
+        private WasapiLoopbackCapture speakerSource;
+        private BufferedWaveProvider micBuffer;
+        private BufferedWaveProvider speakerBuffer;
+        private WaveFileWriter writer;
+        private string outputFilePath;
+
+        // Add a field to track if WebView2 is initialized
+        private bool webView2Initialized = false;
+
+        public Form3()
+        {
+            InitializeComponent();
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.StartPosition = FormStartPosition.Manual;
+            this.Size = new Size(300, 120);
+
+            // Initialize WebView2 (hidden)
+            InitializeWebView2Async();
+        }
+
+        private async void InitializeWebView2Async()
+        {
+            try
+            {
+                await webView2Hidden.EnsureCoreWebView2Async(null);
+                webView2Initialized = true;
+            }
+            catch (COMException)
+            {
+                // WebView2 runtime not installed
+                webView2Initialized = false;
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            ApplyRoundCorners(10);
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            ApplyRoundCorners(10);
+        }
+
+        private void ApplyRoundCorners(int radius)
+        {
+            using (var path = new GraphicsPath())
+            {
+                float r = radius;
+                float w = this.Width;
+                float h = this.Height;
+                path.StartFigure();
+                path.AddArc(0, 0, r, r, 180, 90);
+                path.AddArc(w - r, 0, r, r, 270, 90);
+                path.AddArc(w - r, h - r, r, r, 0, 90);
+                path.AddArc(0, h - r, r, r, 90, 90);
+                path.CloseFigure();
+                this.Region = new Region(path);
+            }
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form3_Load(object sender, EventArgs e)
+        {
+            StartCombinedRecording();
+        }
+
+        public async void StartCombinedRecording()
+        {
+            outputFilePath = Path.Combine(Path.GetTempPath(), "result.wav");
+
+            // Set up microphone input (44.1kHz mono)
+            micSource = new WaveInEvent();
+            micSource.WaveFormat = new WaveFormat(44100, 1);
+            micBuffer = new BufferedWaveProvider(micSource.WaveFormat);
+
+            micSource.DataAvailable += (s, a) =>
+            {
+                micBuffer.AddSamples(a.Buffer, 0, a.BytesRecorded);
+            };
+
+            // Set up speaker (loopback) input (system default format, often 48kHz stereo)
+            speakerSource = new WasapiLoopbackCapture();
+            speakerBuffer = new BufferedWaveProvider(speakerSource.WaveFormat);
+
+            speakerSource.DataAvailable += (s, a) =>
+            {
+                speakerBuffer.AddSamples(a.Buffer, 0, a.BytesRecorded);
+            };
+
+            micSource.StartRecording();
+            speakerSource.StartRecording();
+
+            // Convert both sources to 44.1kHz stereo for mixing
+            var micProvider = micBuffer.ToSampleProvider();
+            if (micProvider.WaveFormat.SampleRate != 44100)
+                micProvider = new WdlResamplingSampleProvider(micProvider, 44100);
+            micProvider = micProvider.ToStereo();
+
+            var speakerProvider = speakerBuffer.ToSampleProvider();
+            if (speakerProvider.WaveFormat.SampleRate != 44100)
+                speakerProvider = new WdlResamplingSampleProvider(speakerProvider, 44100);
+            if (speakerProvider.WaveFormat.Channels == 1)
+                speakerProvider = speakerProvider.ToStereo();
+
+            var mixer = new MixingSampleProvider(new[] { micProvider, speakerProvider });
+            mixer.ReadFully = true;
+
+            writer = new WaveFileWriter(outputFilePath, WaveFormat.CreateIeeeFloatWaveFormat(44100, 2));
+
+            var buffer = new float[44100 * 2]; // 1 second buffer for stereo
+            int secondsRecorded = 0;
+
+            while (secondsRecorded < 7) // Changed from 15 to 7
+            {
+                int samplesRead = mixer.Read(buffer, 0, buffer.Length);
+                if (samplesRead > 0)
+                {
+                    writer.WriteSamples(buffer, 0, samplesRead);
+                }
+                await Task.Delay(1000);
+                secondsRecorded++;
+            }
+
+            micSource.StopRecording();
+            speakerSource.StopRecording();
+            writer.Dispose();
+
+            // After saving the file, upload and scrape song name
+            await UploadAndScrapeSongNameAsync(outputFilePath);
+        }
+
+        private async Task UploadAndScrapeSongNameAsync(string filePath)
+        {
+            if (!webView2Initialized)
+            {
+                MessageBox.Show("WebView2 is not available. Please install the WebView2 runtime.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var tcs = new TaskCompletionSource<string>();
+
+            void WebMessageReceived(object sender, Microsoft.Web.WebView2.Core.CoreWebView2WebMessageReceivedEventArgs e)
+            {
+                string songName = e.TryGetWebMessageAsString();
+                tcs.TrySetResult(songName);
+            }
+
+            webView2Hidden.CoreWebView2.WebMessageReceived += WebMessageReceived;
+
+            // Navigate to the upload page
+            webView2Hidden.Visible = false;
+            webView2Hidden.Size = new Size(10, 10);
+
+            webView2Hidden.CoreWebView2.Navigate("https://www.aha-music.com/upload");
+
+            // Wait for the page to load
+            webView2Hidden.CoreWebView2.NavigationCompleted += async (s, e) =>
+            {
+                try
+                {
+                    // Inject JavaScript to set up a listener for upload completion and scrape the song name
+                    string js = @"
+                        (function() {
+                            // Find the file input and set up a listener for the result
+                            let input = document.querySelector('input[type=file]');
+                            if (!input) { window.chrome.webview.postMessage('File input not found'); return; }
+                            // Create a DataTransfer to set the file
+                            window.addEventListener('aha-music-result', function(ev) {
+                                let result = ev.detail && ev.detail.song && ev.detail.song.title ? ev.detail.song.title : 'Song not found';
+                                window.chrome.webview.postMessage(result);
+                            });
+                        })();
+                    ";
+                    await webView2Hidden.CoreWebView2.ExecuteScriptAsync(js);
+
+                    // Use WebView2's CoreWebView2.OpenFilePicker to set the file input (not directly possible, so use postMessage)
+                    // Instead, use WebView2's AddHostObjectToScript to pass the file from C# to JS
+                    // But for .NET Framework, this is not supported, so use clipboard as a workaround is not feasible.
+                    // Instead, use the following approach:
+
+                    // Use WebView2 to select the file input and trigger the upload via JS
+                    // Use WebView2's CoreWebView2.OpenDevToolsWindow() for debugging if needed
+
+                    // Use WebView2's ExecuteScriptAsync to set the file input (not possible due to browser security)
+                    // Instead, use WebView2's CoreWebView2.OpenFilePicker API (not available in .NET Framework)
+                    // So, fallback: show a message to the user to manually upload if automation fails
+
+                    // Try to automate file upload using JS (will not work due to browser security, but attempt anyway)
+                    string jsUpload = @"
+                        (function() {
+                            let input = document.querySelector('input[type=file]');
+                            if (input) {
+                                input.style.display = 'block';
+                                input.style.opacity = 1;
+                                input.style.zIndex = 9999;
+                                input.click();
+                            }
+                        })();
+                    ";
+                    await webView2Hidden.CoreWebView2.ExecuteScriptAsync(jsUpload);
+
+                    // Show a message to the user to manually select the file if automation fails
+                    MessageBox.Show(""Please select the file '" + filePath + @"' in the file dialog that appears to continue song recognition."", ""Manual Upload Required"", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Wait for the result to be posted back from JS
+                }
+                catch (Exception ex)
+                {
+                    tcs.TrySetResult("Error: " + ex.Message);
+                }
+            };
+
+            // Wait for the result from JS
+            string songName = await tcs.Task;
+
+            webView2Hidden.CoreWebView2.WebMessageReceived -= WebMessageReceived;
+
+            // Show the result in a pop-up window
+            MessageBox.Show("Song name: " + songName, "Recognition Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void webView2AhaMusic_Click(object sender, EventArgs e)
+        {
+
+        }
+    }
+
+    // Extension method must be in a static class
+    public

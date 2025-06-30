@@ -15,6 +15,9 @@ namespace Crop_To_Search
         private WebView2 webView;
         private System.Windows.Forms.Timer progressTimer;
         private int fakeProgress;
+        private Timer slideDownTimer;
+        private int targetTop;
+        private Label offlineErrorLabel;
 
         public Form1()
         {
@@ -32,6 +35,11 @@ namespace Crop_To_Search
                 webView.BackColor = Color.Black;
                 pictureBox1.Show();
                 pictureBox3.Show();
+                this.Icon = new Icon("crop-to-search-dark.ico");
+            }
+            else
+            {
+                this.Icon = new Icon("crop-to-search.ico");
             }
         }
 
@@ -52,10 +60,34 @@ namespace Crop_To_Search
 
         private async void Form1_Load(object sender, EventArgs e)
         {
+            
+            this.Top = -this.Height;
+            this.Left = (Screen.PrimaryScreen.WorkingArea.Width - this.Width) / 2;
+            targetTop = (Screen.PrimaryScreen.WorkingArea.Height - this.Height) / 4; 
+
+            slideDownTimer = new Timer();
+            slideDownTimer.Interval = 10; 
+            slideDownTimer.Tick += SlideDownTimer_Tick;
+            slideDownTimer.Start();
+            this.CreateRoundRegion();
             this.Hide();
             string imageUrl = await CaptureAndUploadScreenshot();
             if (!string.IsNullOrEmpty(imageUrl))
                 DisplayGoogleLensResults(imageUrl);
+        }
+
+        private void SlideDownTimer_Tick(object sender, EventArgs e)
+        {
+            if (this.Top < targetTop)
+            {
+                this.Top += 75; // Speed of animation
+                if (this.Top > targetTop)
+                    this.Top = targetTop;
+            }
+            else
+            {
+                slideDownTimer.Stop();
+            }
         }
 
         private void InitializeWebView()
@@ -75,6 +107,7 @@ namespace Crop_To_Search
             {
                 webView.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
                 webView.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
+                webView.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted_Failure;
             }
         }
 
@@ -99,6 +132,14 @@ namespace Crop_To_Search
                 webView.CoreWebView2.ExecuteScriptAsync(
                     "document.body.style.backgroundColor = '';"
                 );
+            }
+        }
+
+        private void CoreWebView2_NavigationCompleted_Failure(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
+        {
+            if (!e.IsSuccess)
+            {
+                ShowOfflineErrorLabel();
             }
         }
 
@@ -199,14 +240,14 @@ namespace Crop_To_Search
                     {
                         if (i == maxRetries - 1)
                         {
-                            ShowErrorMessage("Upload failed. Please try again later.");
+                            ShowOfflineErrorLabel();
                             return null;
                         }
                         await Task.Delay(2000);
                     }
                     catch (Exception)
                     {
-                        ShowErrorMessage("An error occurred during upload.");
+                        ShowOfflineErrorLabel();
                         return null;
                     }
                 }
@@ -224,9 +265,20 @@ namespace Crop_To_Search
             this.Show();
         }
 
-        private void Form1_Load_1(object sender, EventArgs e)
+        private void ShowOfflinePage()
         {
-            this.CreateRoundRegion();
+            string offlinePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "offline.html");
+            if (File.Exists(offlinePath))
+            {
+                webView.Source = new Uri(offlinePath);
+                webView.Visible = true;
+                webView.BringToFront();
+                this.Show();
+            }
+            else
+            {
+                MessageBox.Show("Offline page not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void CreateRoundRegion()
@@ -284,19 +336,55 @@ namespace Crop_To_Search
             }));
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
+        private void ShowOfflineErrorLabel()
         {
+            if (pictureBox3 != null)
+            {
+                this.Controls.Remove(pictureBox3);
+                pictureBox3.Dispose();
+                pictureBox3 = null;
+            }
+            if (pictureBox4 != null)
+            {
+                this.Controls.Remove(pictureBox4);
+                pictureBox4.Dispose();
+                pictureBox4 = null;
+            }
 
-        }
+            if (offlineErrorLabel == null)
+            {
+                offlineErrorLabel = new Label();
+                offlineErrorLabel.Text = "You are either offline or currently one \n of the APIs is not functioning correctly.";
+                offlineErrorLabel.Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 30, FontStyle.Bold);
+                offlineErrorLabel.TextAlign = ContentAlignment.MiddleCenter;
+                offlineErrorLabel.BackColor = Color.Transparent;
+                offlineErrorLabel.AutoSize = true;
+                this.Controls.Add(offlineErrorLabel);
+            }
 
-        private void pictureBox2_Click(object sender, EventArgs e)
-        {
+            // Set label color based on theme
+            if (ThemeHelper.IsWindowsInDarkMode())
+            {
+                offlineErrorLabel.ForeColor = Color.White;
+            }
+            else
+            {
+                offlineErrorLabel.ForeColor = Color.Black;
+            }
 
-        }
+            if (pictureBox1 != null)
+            {
+                offlineErrorLabel.Left = (this.ClientSize.Width - offlineErrorLabel.Width) / 2;
+                offlineErrorLabel.Top = pictureBox1.Bottom + 20;
+            }
+            else
+            {
+                offlineErrorLabel.Left = (this.ClientSize.Width - offlineErrorLabel.Width) / 2;
+                offlineErrorLabel.Top = (this.ClientSize.Height - offlineErrorLabel.Height) / 2;
+            }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
+            offlineErrorLabel.BringToFront();
+            offlineErrorLabel.Visible = true;
         }
     }
 }

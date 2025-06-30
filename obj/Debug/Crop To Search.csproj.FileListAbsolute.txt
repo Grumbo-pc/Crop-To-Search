@@ -1,0 +1,84 @@
+D:\source\Crop To Search\bin\Debug\runtimes\win-x86\native\WebView2Loader.dll
+D:\source\Crop To Search\bin\Debug\runtimes\win-x64\native\WebView2Loader.dll
+D:\source\Crop To Search\bin\Debug\runtimes\win-arm64\native\WebView2Loader.dll
+D:\source\Crop To Search\bin\Debug\Crop To Search.exe.config
+D:\source\Crop To Search\bin\Debug\Crop To Search.exe
+D:\source\Crop To Search\bin\Debug\Crop To Search.pdb
+D:\source\Crop To Search\bin\Debug\Microsoft.Bcl.AsyncInterfaces.dll
+D:\source\Crop To Search\bin\Debug\Microsoft.Web.WebView2.Core.dll
+D:\source\Crop To Search\bin\Debug\Microsoft.Web.WebView2.WinForms.dll
+D:\source\Crop To Search\bin\Debug\Microsoft.Web.WebView2.Wpf.dll
+D:\source\Crop To Search\bin\Debug\Newtonsoft.Json.dll
+D:\source\Crop To Search\bin\Debug\RestSharp.dll
+D:\source\Crop To Search\bin\Debug\RestSharp.Serializers.Newtonsoft.Json.dll
+D:\source\Crop To Search\bin\Debug\System.Buffers.dll
+D:\source\Crop To Search\bin\Debug\System.IO.Pipelines.dll
+D:\source\Crop To Search\bin\Debug\System.Memory.dll
+D:\source\Crop To Search\bin\Debug\System.Numerics.Vectors.dll
+D:\source\Crop To Search\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
+D:\source\Crop To Search\bin\Debug\System.Text.Encodings.Web.dll
+D:\source\Crop To Search\bin\Debug\System.Text.Json.dll
+D:\source\Crop To Search\bin\Debug\System.Threading.Tasks.Extensions.dll
+D:\source\Crop To Search\bin\Debug\System.ValueTuple.dll
+D:\source\Crop To Search\bin\Debug\Microsoft.Bcl.AsyncInterfaces.xml
+D:\source\Crop To Search\bin\Debug\Microsoft.Web.WebView2.Core.xml
+D:\source\Crop To Search\bin\Debug\Microsoft.Web.WebView2.WinForms.xml
+D:\source\Crop To Search\bin\Debug\Microsoft.Web.WebView2.Wpf.xml
+D:\source\Crop To Search\bin\Debug\Newtonsoft.Json.xml
+D:\source\Crop To Search\bin\Debug\RestSharp.xml
+D:\source\Crop To Search\bin\Debug\System.Buffers.xml
+D:\source\Crop To Search\bin\Debug\System.IO.Pipelines.xml
+D:\source\Crop To Search\bin\Debug\System.Memory.xml
+D:\source\Crop To Search\bin\Debug\System.Numerics.Vectors.xml
+D:\source\Crop To Search\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+D:\source\Crop To Search\bin\Debug\System.Text.Encodings.Web.xml
+D:\source\Crop To Search\bin\Debug\System.Text.Json.xml
+D:\source\Crop To Search\bin\Debug\System.Threading.Tasks.Extensions.xml
+D:\source\Crop To Search\obj\Debug\Crop To Search.csproj.AssemblyReference.cache
+D:\source\Crop To Search\obj\Debug\Crop_To_Search.Form1.resources
+D:\source\Crop To Search\obj\Debug\Crop_To_Search.Form2.resources
+D:\source\Crop To Search\obj\Debug\Crop_To_Search.Properties.Resources.resources
+D:\source\Crop To Search\obj\Debug\Crop_To_Search.SearchBarForm.resources
+D:\source\Crop To Search\obj\Debug\Crop To Search.csproj.GenerateResource.cache
+D:\source\Crop To Search\obj\Debug\Crop To Search.csproj.CoreCompileInputs.cache
+D:\source\Crop To Search\obj\Debug\Crop To .5580090C.Up2Date
+D:\source\Crop To Search\obj\Debug\Crop To Search.exe
+D:\source\Crop To Search\obj\Debug\Crop To Search.pdb
+D:\source\Crop To Search\obj\Debug\Crop_To_Search.Form3.resources
+D:\source\Crop To Search\bin\Debug\Microsoft.Win32.Registry.dll
+D:\source\Crop To Search\bin\Debug\NAudio.Asio.dll
+D:\source\Crop To Search\bin\Debug\NAudio.Core.dll
+D:\source\Crop To Search\bin\Debug\NAudio.dll
+D:\source\Crop To Search\bin\Debug\NAudio.Midi.dll
+D:\source\Crop To Search\bin\Debug\NAudio.Wasapi.dll
+D:\source\Crop To Search\bin\Debug\NAudio.WinForms.dll
+D:\source\Crop To Search\bin\Debug\NAudio.WinMM.dll
+D:\source\Crop To Search\bin\Debug\System.Security.AccessControl.dll
+D:\source\Crop To Search\bin\Debug\System.Security.Principal.Windows.dll
+D:\source\Crop To Search\bin\Debug\Microsoft.Win32.Registry.xml
+D:\source\Crop To Search\bin\Debug\NAudio.xml
+D:\source\Crop To Search\bin\Debug\NAudio.Asio.xml
+D:\source\Crop To Search\bin\Debug\NAudio.Core.xml
+D:\source\Crop To Search\bin\Debug\NAudio.Midi.xml
+D:\source\Crop To Search\bin\Debug\NAudio.Wasapi.xml
+D:\source\Crop To Search\bin\Debug\NAudio.WinForms.xml
+D:\source\Crop To Search\bin\Debug\NAudio.WinMM.xml
+D:\source\Crop To Search\bin\Debug\System.Security.AccessControl.xml
+D:\source\Crop To Search\bin\Debug\System.Security.Principal.Windows.xml
+D:\source\Crop To Search\bin\Debug\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+D:\source\Crop To Search\bin\Debug\Microsoft.Extensions.Features.dll
+D:\source\Crop To Search\bin\Debug\Microsoft.Extensions.Options.dll
+D:\source\Crop To Search\bin\Debug\Microsoft.Extensions.Primitives.dll
+D:\source\Crop To Search\bin\Debug\System.Net.Http.Json.dll
+D:\source\Crop To Search\bin\Debug\Microsoft.Extensions.DependencyInjection.Abstractions.xml
+D:\source\Crop To Search\bin\Debug\Microsoft.Extensions.Features.xml
+D:\source\Crop To Search\bin\Debug\Microsoft.Extensions.Options.xml
+D:\source\Crop To Search\bin\Debug\Microsoft.Extensions.Primitives.xml
+D:\source\Crop To Search\bin\Debug\System.Net.Http.Json.xml
+D:\source\Crop To Search\bin\Debug\libacrcloud_extr_tool.dll
+D:\source\Crop To Search\bin\Debug\ACRCloudRecognitionTest.exe
+D:\source\Crop To Search\bin\Debug\Microsoft.Extensions.Logging.Abstractions.dll
+D:\source\Crop To Search\bin\Debug\System.Diagnostics.DiagnosticSource.dll
+D:\source\Crop To Search\bin\Debug\Microsoft.Extensions.Logging.Abstractions.xml
+D:\source\Crop To Search\bin\Debug\System.Diagnostics.DiagnosticSource.xml
+D:\source\Crop To Search\obj\Debug\Crop_To_Search.Terms_And_Conditions.resources

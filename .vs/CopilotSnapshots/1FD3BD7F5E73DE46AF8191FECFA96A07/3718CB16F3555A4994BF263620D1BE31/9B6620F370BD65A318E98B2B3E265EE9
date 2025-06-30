@@ -1,0 +1,232 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing.Drawing2D;
+using NAudio.Wave;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
+using NAudio.Wave.SampleProviders;
+using System.Diagnostics;   // For Process.Start
+using System.IO;            
+using System.Windows.Forms; 
+using Microsoft.Web.WebView2.Core; 
+using System.Text.Json;     
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using NAudio.Lame;
+using System.Security.Cryptography;
+
+
+
+namespace Crop_To_Search
+{
+    public partial class Form3 : Form
+    {
+        private WaveInEvent micSource;
+        private WasapiLoopbackCapture speakerSource;
+        private BufferedWaveProvider micBuffer;
+        private BufferedWaveProvider speakerBuffer;
+        private WaveFileWriter writer;
+        private string outputFilePath;
+        //replace these
+        private static readonly string hostUrl = "https://identify-ap-southeast-1.acrcloud.com/v1/identify";
+        private static readonly string accessKey = "576620619f8163f507b4114d41142899";
+        private static readonly string secretKey = "gD8qnAplhNNchhEis5fMu771YUWyCA8Cz3mLxYh5";
+        public static async Task ProcessAudio()
+        {
+            string tempPath = Path.GetTempPath();
+            string wavFile = Path.Combine(tempPath, "result.wav");
+
+            if (!File.Exists(wavFile))
+            {
+                MessageBox.Show("WAV file not found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            await UploadToACRCloud(wavFile);
+        }
+
+        private static async Task UploadToACRCloud(string filePath)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                string signatureString = $"access_key={accessKey}&timestamp={timestamp}";
+                string signature = GenerateSignature(signatureString, secretKey);
+
+                byte[] audioBytes = File.ReadAllBytes(filePath);
+                MultipartFormDataContent form = new MultipartFormDataContent();
+                form.Add(new ByteArrayContent(audioBytes), "sample", "result.wav");
+
+                form.Add(new StringContent(accessKey), "access_key");
+                form.Add(new StringContent(signature), "signature");
+                form.Add(new StringContent(timestamp.ToString()), "timestamp");
+                form.Add(new StringContent("audio"), "data_type");
+                form.Add(new StringContent("1"), "signature_version");
+
+                string requestUrl = $"{hostUrl}/v1/identify";
+
+                HttpResponseMessage response = await client.PostAsync(requestUrl, form);
+                string result = await response.Content.ReadAsStringAsync();
+
+                MessageBox.Show(result, "Recognition Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+
+
+        private static string GenerateSignature(string data, string key)
+        {
+            using (HMACSHA1 hmac = new HMACSHA1(Encoding.UTF8.GetBytes(key)))
+            {
+                byte[] hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+                return Convert.ToBase64String(hash);
+            }
+        }
+
+        public Form3()
+        {
+            InitializeComponent();
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.StartPosition = FormStartPosition.Manual;
+            this.Size = new Size(300, 120);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            ApplyRoundCorners(10);
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            ApplyRoundCorners(10);
+        }
+
+        private void ApplyRoundCorners(int radius)
+        {
+            using (var path = new GraphicsPath())
+            {
+                float r = radius;
+                float w = this.Width;
+                float h = this.Height;
+                path.StartFigure();
+                path.AddArc(0, 0, r, r, 180, 90);
+                path.AddArc(w - r, 0, r, r, 270, 90);
+                path.AddArc(w - r, h - r, r, r, 0, 90);
+                path.AddArc(0, h - r, r, r, 90, 90);
+                path.CloseFigure();
+                this.Region = new Region(path);
+            }
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form3_Load(object sender, EventArgs e)
+        {
+            StartCombinedRecording();
+        }
+
+        public async void StartCombinedRecording()
+        {
+            outputFilePath = Path.Combine(Path.GetTempPath(), "result.wav");
+
+            // Set up microphone input (44.1kHz mono)
+            micSource = new WaveInEvent();
+            micSource.WaveFormat = new WaveFormat(44100, 1);
+            micBuffer = new BufferedWaveProvider(micSource.WaveFormat);
+
+            micSource.DataAvailable += (s, a) =>
+            {
+                micBuffer.AddSamples(a.Buffer, 0, a.BytesRecorded);
+            };
+
+            // Set up speaker (loopback) input (system default format, often 48kHz stereo)
+            speakerSource = new WasapiLoopbackCapture();
+            speakerBuffer = new BufferedWaveProvider(speakerSource.WaveFormat);
+
+            speakerSource.DataAvailable += (s, a) =>
+            {
+                speakerBuffer.AddSamples(a.Buffer, 0, a.BytesRecorded);
+            };
+
+            micSource.StartRecording();
+            speakerSource.StartRecording();
+
+            // Convert both sources to 44.1kHz stereo for mixing
+            var micProvider = micBuffer.ToSampleProvider();
+            if (micProvider.WaveFormat.SampleRate != 44100)
+                micProvider = new WdlResamplingSampleProvider(micProvider, 44100);
+            micProvider = micProvider.ToStereo();
+
+            var speakerProvider = speakerBuffer.ToSampleProvider();
+            if (speakerProvider.WaveFormat.SampleRate != 44100)
+                speakerProvider = new WdlResamplingSampleProvider(speakerProvider, 44100);
+            if (speakerProvider.WaveFormat.Channels == 1)
+                speakerProvider = speakerProvider.ToStereo();
+
+            var mixer = new MixingSampleProvider(new[] { micProvider, speakerProvider });
+            mixer.ReadFully = true;
+
+            writer = new WaveFileWriter(outputFilePath, WaveFormat.CreateIeeeFloatWaveFormat(44100, 2));
+
+            var buffer = new float[44100 * 2]; // 1 second buffer for stereo
+            int secondsRecorded = 0;
+
+            while (secondsRecorded < 10) // second timer set
+            {
+                int samplesRead = mixer.Read(buffer, 0, buffer.Length);
+                if (samplesRead > 0)
+                {
+                    writer.WriteSamples(buffer, 0, samplesRead);
+                }
+                await Task.Delay(1000);
+                secondsRecorded++;
+            }
+
+            micSource.StopRecording();
+            speakerSource.StopRecording();
+            writer.Dispose();
+
+            // Open the recorded file with the default audio player
+            //Process.Start(outputFilePath);
+            await ProcessAudio();
+
+        }
+
+        private void webView2AhaMusic_Click(object sender, EventArgs e)
+        {
+
+        }
+
+    }
+
+    // Extension method must be in a static class
+    public static class SampleProviderExtensions
+    {
+        public static ISampleProvider ToStereo(this ISampleProvider source)
+        {
+            if (source.WaveFormat.Channels == 2)
+                return source;
+            return new MonoToStereoSampleProvider(source);
+        }
+    }
+}

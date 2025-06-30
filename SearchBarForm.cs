@@ -10,7 +10,7 @@ namespace Crop_To_Search
     {
 
         private Form1 _owner;
-        private Form3 _form3Instance; 
+        private Form3 _form3Instance;
 
         public void PositionBelowForm(Form1 form1)
         {
@@ -79,6 +79,9 @@ namespace Crop_To_Search
             button1.Region = new Region(path);
             button1.FlatStyle = FlatStyle.Flat;
             button1.FlatAppearance.BorderSize = 0;
+            button1.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            button1.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            button1.Paint += button1_Paint;
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -112,6 +115,16 @@ namespace Crop_To_Search
                     g.SmoothingMode = SmoothingMode.AntiAlias;
                 }
                 this.Region = new Region(path);
+            }
+        }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000; 
+                return cp;
             }
         }
 
@@ -201,9 +214,27 @@ namespace Crop_To_Search
                 _form3Instance.Location = new Point(x, y);
             }
             else
-            {
+            { 
                 _form3Instance.BringToFront();
                 _form3Instance.Focus();
+            }
+        }
+
+        private void button1_Paint(object sender, PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            using (SolidBrush brush = new SolidBrush(button1.BackColor))
+            {
+                e.Graphics.FillEllipse(brush, 0, 0, button1.Width, button1.Height);
+            }
+
+            if (button1.Image != null)
+            {
+                int imgW = button1.Image.Width;
+                int imgH = button1.Image.Height;
+                int x = (button1.Width - imgW) / 2;
+                int y = (button1.Height - imgH) / 2;
+                e.Graphics.DrawImage(button1.Image, x, y, imgW, imgH);
             }
         }
     }

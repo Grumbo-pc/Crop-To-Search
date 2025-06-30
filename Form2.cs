@@ -7,11 +7,14 @@ namespace Crop_To_Search
 {
     public partial class Form2 : Form
     {
-        private Timer delayTimer;
+        private Timer fadeInTimer;
+        private double targetOpacity = 0.5;
+        private double fadeStep = 0.05;
 
         public Form2()
         {
             InitializeComponent();
+            this.Visible = false; 
             this.Load += new EventHandler(Form2_Load);
             this.Click += Form2_Click;
             foreach (Control c in this.Controls)
@@ -33,17 +36,29 @@ namespace Crop_To_Search
             this.WindowState = FormWindowState.Maximized;
             this.TopMost = false;
             this.Opacity = 0;
-            delayTimer = new Timer();
-            delayTimer.Interval = 1000;
-            delayTimer.Tick += DelayTimer_Tick;
-            delayTimer.Start();
+            this.BackColor = Color.Black;
+
+            fadeInTimer = new Timer();
+            fadeInTimer.Interval = 20;
+            fadeInTimer.Tick += FadeInTimer_Tick;
+
+            
+            this.Visible = true;
+            fadeInTimer.Start();
         }
 
-        private void DelayTimer_Tick(object sender, EventArgs e)
+        private void FadeInTimer_Tick(object sender, EventArgs e)
         {
-            delayTimer.Stop();
-            this.BackColor = Color.Black;
-            this.Opacity = 0.5;
+            if (this.Opacity < targetOpacity)
+            {
+                this.Opacity += fadeStep;
+                if (this.Opacity > targetOpacity)
+                    this.Opacity = targetOpacity;
+            }
+            else
+            {
+                fadeInTimer.Stop();
+            }
         }
     }
 }

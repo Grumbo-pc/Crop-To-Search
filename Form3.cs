@@ -7,13 +7,10 @@ using NAudio.Wave;
 using System.Diagnostics;
 using System.IO;
 using NAudio.Wave.SampleProviders;
-
-
+using System.ComponentModel; 
 
 namespace Crop_To_Search
 {
-
-
     public partial class Form3 : Form
     {
         private WaveInEvent micSource;
@@ -27,12 +24,24 @@ namespace Crop_To_Search
         private Color fadeColor = ColorTranslator.FromHtml("#5880EA");
         private float fadeProgress = 0f;
         private bool fadingToCyan = true;
-        private const int FadeDurationMs = 1000; 
+        private const int FadeDurationMs = 1000;
         private const int FadeStepMs = 20;
 
         public Form3()
         {
             InitializeComponent();
+            if (ThemeHelper.IsWindowsInDarkMode())
+            {
+                originalColor = ColorTranslator.FromHtml("#282a2c");
+                label1.ForeColor = Color.White;
+                label2.ForeColor = Color.White;
+            }
+            else
+            {
+                originalColor = Color.White;
+                label1.ForeColor = Color.Black; 
+                label2.ForeColor = Color.Black;
+            }
             this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.Manual;
             this.Size = new Size(300, 80);
@@ -42,7 +51,6 @@ namespace Crop_To_Search
             fadeTimer.Tick += FadeTimer_Tick;
             fadeTimer.Start();
         }
-
         private void FadeTimer_Tick(object sender, EventArgs e)
         {
             float step = (float)FadeStepMs / FadeDurationMs;
@@ -97,7 +105,6 @@ namespace Crop_To_Search
                 this.Region = new Region(path);
             }
         }
-
 
         private void Form3_Load(object sender, EventArgs e)
         {
@@ -165,14 +172,13 @@ namespace Crop_To_Search
             speakerSource.StopRecording();
             writer.Dispose();
 
-
             string exePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ACRCloudRecognitionTest.exe");
             var startInfo = new ProcessStartInfo
             {
                 FileName = exePath,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 CreateNoWindow = true,
-                UseShellExecute = false 
+                UseShellExecute = false
             };
             Process.Start(startInfo);
             string filePath = Path.Combine(Path.GetTempPath(), "screenshot.png");
@@ -189,6 +195,67 @@ namespace Crop_To_Search
             if (source.WaveFormat.Channels == 2)
                 return source;
             return new MonoToStereoSampleProvider(source);
+        }
+    }
+
+    public class RoundButton : Button
+    {
+        [DefaultValue(10)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        public int CornerRadius { get; set; } = 10;
+
+        public RoundButton()
+        {
+            this.FlatStyle = FlatStyle.Flat;
+            this.FlatAppearance.BorderSize = 0;
+            this.BackColor = Color.White; // Or set to match your form's background
+            this.TabStop = false;
+            this.SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs pevent)
+        {
+            // Paint parent background in corners for seamless blending
+            if (Parent != null)
+            {
+                var g = pevent.Graphics;
+                var state = g.Save();
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                var rect = this.ClientRectangle;
+                g.TranslateTransform(-this.Left, -this.Top);
+                var pe = new PaintEventArgs(g, new Rectangle(this.Left, this.Top, this.Width, this.Height));
+                InvokePaintBackground(Parent, pe);
+                InvokePaint(Parent, pe);
+                g.Restore(state);
+            }
+            else
+            {
+                base.OnPaintBackground(pevent);
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs pevent)
+        {
+            pevent.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            using (var path = new GraphicsPath())
+            {
+                float r = CornerRadius;
+                float w = this.Width;
+                float h = this.Height;
+                path.StartFigure();
+                path.AddArc(0, 0, r, r, 180, 90);
+                path.AddArc(w - r, 0, r, r, 270, 90);
+                path.AddArc(w - r, h - r, r, r, 0, 90);
+                path.AddArc(0, h - r, r, r, 90, 90);
+                path.CloseFigure();
+
+                this.Region = new Region(path);
+
+                using (var brush = new SolidBrush(this.BackColor))
+                    pevent.Graphics.FillPath(brush, path);
+
+                TextRenderer.DrawText(pevent.Graphics, this.Text, this.Font, this.ClientRectangle, this.ForeColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
         }
     }
 }

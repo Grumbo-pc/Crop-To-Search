@@ -1,8 +1,0 @@
-C:\Users\PC-1.DESKTOP-421EUGM\Downloads\acrcloud_sdk_csharp-master\ACRCloudRecognitionTest\ACRCloudRecognitionTest\bin\x64\Debug\ACRCloudRecognitionTest.exe.config
-C:\Users\PC-1.DESKTOP-421EUGM\Downloads\acrcloud_sdk_csharp-master\ACRCloudRecognitionTest\ACRCloudRecognitionTest\bin\x64\Debug\ACRCloudRecognitionTest.exe
-C:\Users\PC-1.DESKTOP-421EUGM\Downloads\acrcloud_sdk_csharp-master\ACRCloudRecognitionTest\ACRCloudRecognitionTest\bin\x64\Debug\ACRCloudRecognitionTest.pdb
-C:\Users\PC-1.DESKTOP-421EUGM\Downloads\acrcloud_sdk_csharp-master\ACRCloudRecognitionTest\ACRCloudRecognitionTest\obj\x64\Debug\ACRCloudRecognitionTest.csproj.AssemblyReference.cache
-C:\Users\PC-1.DESKTOP-421EUGM\Downloads\acrcloud_sdk_csharp-master\ACRCloudRecognitionTest\ACRCloudRecognitionTest\obj\x64\Debug\ACRCloudRecognitionTest.csproj.CoreCompileInputs.cache
-C:\Users\PC-1.DESKTOP-421EUGM\Downloads\acrcloud_sdk_csharp-master\ACRCloudRecognitionTest\ACRCloudRecognitionTest\obj\x64\Debug\ACRCloudRecognitionTest.exe
-C:\Users\PC-1.DESKTOP-421EUGM\Downloads\acrcloud_sdk_csharp-master\ACRCloudRecognitionTest\ACRCloudRecognitionTest\obj\x64\Debug\ACRCloudRecognitionTest.pdb
-C:\Users\PC-1.DESKTOP-421EUGM\Downloads\acrcloud_sdk_csharp-master\ACRCloudRecognitionTest\ACRCloudRecognitionTest\bin\x64\Debug\libacrcloud_extr_tool.dll

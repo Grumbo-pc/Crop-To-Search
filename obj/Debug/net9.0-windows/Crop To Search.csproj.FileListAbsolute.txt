@@ -1,0 +1,60 @@
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop To Search.csproj.AssemblyReference.cache
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop_To_Search.Form1.resources
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop_To_Search.Form2.resources
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop_To_Search.Form3.resources
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop_To_Search.Properties.Resources.resources
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop_To_Search.SearchBarForm.resources
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop_To_Search.Terms_And_Conditions.resources
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop To Search.csproj.GenerateResource.cache
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop To Search.GeneratedMSBuildEditorConfig.editorconfig
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop To Search.AssemblyInfoInputs.cache
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop To Search.AssemblyInfo.cs
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop To Search.csproj.CoreCompileInputs.cache
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop To Search.sourcelink.json
+D:\source\Crop To Search\bin\Debug\net9.0-windows\runtimes\win-x86\native\WebView2Loader.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\runtimes\win-x64\native\WebView2Loader.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\runtimes\win-arm64\native\WebView2Loader.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\ACRCloudRecognitionTest.exe
+D:\source\Crop To Search\bin\Debug\net9.0-windows\libacrcloud_extr_tool.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Form1.resx
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Crop To Search.exe
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Crop To Search.dll.config
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Crop To Search.deps.json
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Crop To Search.runtimeconfig.json
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Crop To Search.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Crop To Search.pdb
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.AspNetCore.SystemWebAdapters.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.AspNetCore.SystemWebAdapters.Abstractions.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.AspNetCore.SystemWebAdapters.CoreServices.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Bcl.AsyncInterfaces.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Extensions.Features.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Extensions.Logging.Abstractions.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Extensions.Options.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Extensions.Primitives.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\NAudio.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\NAudio.Asio.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\NAudio.Core.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\NAudio.Midi.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\NAudio.Wasapi.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\NAudio.WinForms.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\NAudio.WinMM.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Newtonsoft.Json.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\RestSharp.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\System.ComponentModel.Composition.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\System.Runtime.Caching.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\runtimes\win\lib\net8.0\System.Runtime.Caching.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Web.WebView2.Core.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Web.WebView2.WinForms.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Web.WebView2.Wpf.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Web.WebView2.Core.xml
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Web.WebView2.WinForms.xml
+D:\source\Crop To Search\bin\Debug\net9.0-windows\Microsoft.Web.WebView2.Wpf.xml
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop To .5580090C.Up2Date
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop To Search.dll
+D:\source\Crop To Search\obj\Debug\net9.0-windows\refint\Crop To Search.dll
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop To Search.pdb
+D:\source\Crop To Search\obj\Debug\net9.0-windows\Crop To Search.genruntimeconfig.cache
+D:\source\Crop To Search\obj\Debug\net9.0-windows\ref\Crop To Search.dll
+D:\source\Crop To Search\bin\Debug\net9.0-windows\crop-to-search.ico
+D:\source\Crop To Search\bin\Debug\net9.0-windows\crop-to-search-dark.ico

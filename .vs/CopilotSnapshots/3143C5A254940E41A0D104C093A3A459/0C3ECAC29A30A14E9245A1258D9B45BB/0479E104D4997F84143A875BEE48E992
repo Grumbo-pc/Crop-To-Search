@@ -1,0 +1,133 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Diagnostics;
+
+namespace Crop_To_Search
+{
+    public partial class SearchBarForm : Form
+    {
+
+        private Form1 _owner;
+        public void PositionBelowForm(Form1 form1)
+        {
+            // Get the working area of the screen where Form1 is located
+            Rectangle screenBounds = Screen.FromControl(form1).WorkingArea;
+
+            // Calculate the Y position: halfway between Form1's bottom and the bottom of the screen
+            int form1Bottom = form1.Bounds.Bottom;
+            int screenBottom = screenBounds.Bottom;
+            int targetY = form1Bottom + (screenBottom - form1Bottom - this.Height) / 2;
+
+            // Center horizontally relative to Form1
+            int targetX = form1.Left + (form1.Width - this.Width) / 2;
+
+            // Move the SearchBarForm
+            this.Location = new Point(targetX, targetY);
+        }
+        public SearchBarForm()
+        {
+            InitializeComponent();
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.StartPosition = FormStartPosition.Manual;
+            this.BackColor = Color.White;
+            this.Shown += (s, e) => PositionBottomCenterByScreenPercent(0.05f);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            int radius = 50;
+            var path = new System.Drawing.Drawing2D.GraphicsPath();
+            path.AddArc(0, 0, radius, radius, 180, 90);
+            path.AddArc(this.Width - radius, 0, radius, radius, 270, 90);
+            path.AddArc(this.Width - radius, this.Height - radius, radius, radius, 0, 90);
+            path.AddArc(0, this.Height - radius, radius, radius, 90, 90);
+            path.CloseAllFigures();
+            this.Region = new Region(path);
+        }
+        public SearchBarForm(Form1 owner)
+        {
+            InitializeComponent();
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.StartPosition = FormStartPosition.Manual;
+            this.BackColor = Color.White;
+            this._owner = owner;
+            this.Shown += SearchBarForm_Shown;
+        }
+
+        private void SearchBarForm_Shown(object sender, EventArgs e)
+        {
+            PositionBottomCenter(40); // 40 pixels above the bottom, adjust as needed
+        }
+        public void PositionBottomCenter(int pixelOffsetFromBottom = 40)
+        {
+            // Get the working area of the screen where the owner is located, or use primary screen if owner is null
+            Rectangle screenBounds = _owner != null
+                ? Screen.FromControl(_owner).WorkingArea
+                : Screen.PrimaryScreen.WorkingArea;
+
+            // Center horizontally
+            int targetX = screenBounds.Left + (screenBounds.Width - this.Width) / 2;
+
+            // Position above the bottom by the specified offset
+            int targetY = screenBounds.Bottom - this.Height - pixelOffsetFromBottom;
+
+            this.Location = new Point(targetX, targetY);
+        }
+        public void PositionBottomCenterByScreenPercent(float percentFromBottom = 0.05f)
+        {
+            // Clamp percent to [0, 1]
+            percentFromBottom = Math.Max(0, Math.Min(1, percentFromBottom));
+
+            Rectangle screenBounds = Screen.PrimaryScreen.WorkingArea;
+            int offset = (int)(screenBounds.Height * percentFromBottom);
+
+            int targetX = screenBounds.Left + (screenBounds.Width - this.Width) / 2;
+            int targetY = screenBounds.Bottom - this.Height - offset;
+
+            this.Location = new Point(targetX, targetY);
+        }
+
+        private void SearchBarForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        // Add this event handler
+        private void textBoxSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true; // Prevent ding sound
+                string query = textBoxSearch.Text.Trim();
+                if (!string.IsNullOrEmpty(query))
+                {
+                    string url = "https://www.google.com/search?q=" + Uri.EscapeDataString(query);
+                    try
+                    {
+                        Process.Start(url);
+                    }
+                    catch
+                    {
+                        // For .NET Framework, Process.Start(url) should work.
+                        // If not, fallback to using "cmd" for some Windows versions:
+                        Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                    }
+                    Application.Exit();
+                }
+            }
+        }
+
+        private void textBoxSearch_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
