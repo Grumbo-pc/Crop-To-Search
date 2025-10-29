@@ -1,5 +1,7 @@
 # Crop To Search
 
+# Tip: chrome now has built in google lens, use that for faster, more secure, more personalized searching using images.
+
 A tool similar to Google's circle to search but for windows 
 
 DO NOT SHOW ANY SENSETIVE INFO ON YOUR SCREEN WHILE HAVING THIS TOOL OPEN
